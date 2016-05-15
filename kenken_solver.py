@@ -1,6 +1,7 @@
 # A solver for KenKen puzzles
 
 from collections import defaultdict
+from itertools import chain, product
 
 from constraint import AllDifferentConstraint, FunctionConstraint, Problem
 
@@ -45,14 +46,20 @@ def solve_board(board, cages):
         for y in range(width):
             if isinstance(board[x][y], basestring):
                 # we are dealing with a cage
-                problem.addVariable((x, y), range(1, width + 1))
                 cage_name_to_locations[board[x][y]].append((x, y))
             else:
                 # we are dealing with a pre-assigned number
                 problem.addVariable((x, y), [board[x][y]])
 
     for cage_name, cage_locations in cage_name_to_locations.iteritems():
-        problem.addConstraint(FunctionConstraint(cages[cage_name]),
+        cage_function = cages[cage_name]
+        all_values = product(range(1, width + 1),
+                             repeat=len(cage_locations))
+        possible_values = set(chain(*[values for values in all_values
+                                      if cage_function(*values)]))
+        for location in cage_locations:
+            problem.addVariable(location, list(possible_values))
+        problem.addConstraint(FunctionConstraint(cage_function),
                               cage_locations)
 
     solution = problem.getSolution()
