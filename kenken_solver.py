@@ -45,7 +45,7 @@ def solve_board(board, cages):
         problem.addConstraint(AllDifferentConstraint(), column_variables)
         for y in range(width):
             if isinstance(board[x][y], basestring):
-                # we are dealing with a cage
+                # we are dealing with a function
                 cage_name_to_locations[board[x][y]].append((x, y))
             else:
                 # we are dealing with a pre-assigned number
